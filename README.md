@@ -24,8 +24,6 @@ PARTICIPANTS="Alice,Bob,Charlie,David"
 npm run dev
 ```
 
-http://localhost:3000 でアプリにアクセス。
-
 ## 本番デプロイ (Vercel)
 
 1. Vercel にプロジェクトをインポート
