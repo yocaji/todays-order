@@ -1,16 +1,13 @@
 Feature: 今日の順番アプリ
 
+  # 注: 環境変数の動的変更が必要なシナリオは単体テストでカバー
+  # E2Eテストでは.env.localの設定（Alice,Bob,Charlie,David）を使用
+
   Scenario: 環境変数から参加者を正常に読み込む
     Given 環境変数VITE_PARTICIPANTSに"Alice,Bob,Charlie,David"が設定されている
     When ページを開く
     Then 「参加者: Alice / Bob / Charlie / David」と表示される
     And 「順番を決める」ボタンが活性化されている
-
-  Scenario: VITE_PARTICIPANTS未設定時にエラーメッセージを表示
-    Given 環境変数VITE_PARTICIPANTSが未設定である
-    When ページを開く
-    Then 「環境変数 VITE_PARTICIPANTS が設定されていません。」とエラー表示される
-    And 「順番を決める」ボタンが非活性である
 
   Scenario: ボタンクリックで順番をシャッフルする
     Given 参加者"Alice,Bob,Charlie,David"でページを開いている
@@ -24,12 +21,7 @@ Feature: 今日の順番アプリ
     When 「順番を決める」ボタンを再度クリックする
     Then 新しい順番で結果が更新される
 
-  Scenario: 空文字やスペースのみの参加者を除外する
-    Given 環境変数VITE_PARTICIPANTSに"Alice, ,Bob, Charlie ,,David"が設定されている
-    When ページを開く
-    Then 「参加者: Alice / Bob / Charlie / David」と表示される
-
-  Scenario: 参加者が空の場合ボタンが押せない
-    Given 環境変数VITE_PARTICIPANTSが空文字である
-    When ページを開く
-    Then 「順番を決める」ボタンがdisabled属性を持つ
+  # 以下のシナリオは環境変数の動的変更が必要なため、単体テストでカバー
+  # - VITE_PARTICIPANTS未設定時にエラーメッセージを表示
+  # - 空文字やスペースのみの参加者を除外する
+  # - 参加者が空の場合ボタンが押せない

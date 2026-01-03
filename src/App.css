@@ -1,42 +1,84 @@
-#root {
-  max-width: 1280px;
+.container {
+  max-width: 600px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+h1 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #333;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.error {
+  color: #dc3545;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.participants {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  color: #555;
+}
+
+button {
+  background-color: #4a90d9;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button:hover:not(:disabled) {
+  background-color: #357abd;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.result {
+  margin-top: 2rem;
+  text-align: left;
+}
+
+.result p {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.result ol {
+  padding-left: 1.5rem;
+  margin: 0;
+}
+
+.result li {
+  font-size: 1.2rem;
+  padding: 0.25rem 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  h1 {
+    color: #fff;
   }
-  to {
-    transform: rotate(360deg);
+
+  .participants {
+    color: #ccc;
   }
-}
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+  .error {
+    background-color: #5c2a2a;
+    border-color: #7a3a3a;
+    color: #ffb3b3;
   }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
 }

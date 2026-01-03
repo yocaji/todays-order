@@ -1,34 +1,52 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import { parseParticipants } from './lib/parseParticipants'
+import { shuffle } from './lib/shuffle'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const participants = parseParticipants(import.meta.env.VITE_PARTICIPANTS)
+  const hasParticipants = participants.length > 0
+  
+  const [shuffledOrder, setShuffledOrder] = useState<readonly string[] | null>(null)
+
+  const handleShuffle = () => {
+    setShuffledOrder(shuffle(participants))
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="container">
+      <h1>今日の順番</h1>
+
+      {!hasParticipants && (
+        <p className="error">環境変数 VITE_PARTICIPANTS が設定されていません。</p>
+      )}
+
+      {hasParticipants && (
+        <p className="participants">参加者: {participants.join(' / ')}</p>
+      )}
+
+      <button 
+        onClick={handleShuffle} 
+        disabled={!hasParticipants}
+      >
+        順番を決める
+      </button>
+
+      <div className="result">
+        {shuffledOrder === null ? (
+          <p>まだ順番が決まっていません。</p>
+        ) : (
+          <>
+            <p>今日の発表順:</p>
+            <ol>
+              {shuffledOrder.map((name, index) => (
+                <li key={index}>{name}</li>
+              ))}
+            </ol>
+          </>
+        )}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 
