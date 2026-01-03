@@ -1,6 +1,6 @@
-# 今日の順番 Webアプリ仕様
+# 今日の順番 Webアプリ仕様書
 
-## 概要
+## 1. 概要
 
 振り返り会当日に、参加者の発表順をランダムに決めるための、シンプルな1ページWebアプリ。
 
@@ -13,28 +13,68 @@
 
 この spec に沿って、GitHub Copilot でコードを補完・生成する。
 
-## 技術スタック・前提
+## 2. 開発方針
 
-- フレームワーク: Next.js (App Router) + TypeScript
-- ホスティング: Vercel
-- ルーティング:
+### 2.1 設計原則
+
+- **シンプルさ優先**: 過度な抽象化を避ける
+- **型安全性**: TypeScriptの型システムを最大限活用
+- **イミュータブル**: readonly を徹底し、意図しない変更を防ぐ
+
+### 2.2 技術スタック
+
+- **フレームワーク**: React + TypeScript
+- **ビルドツール**: Vite
+- **ルーティング**: 不要
   - ルート `/` に1ページだけを表示する
-- 環境変数:
-  - `PARTICIPANTS`: カンマ区切りの参加者名
-    - 例: `PARTICIPANTS="Alice,Bob,Charlie,David"`
+- **テスト**:
+  - 受け入れ/E2E
+    - Playwright + playwright-bdd
+  - 単体/コンポーネント
+    - Vitest + React Testing Library
 
-ローカル開発時:
-- `.env.local` に `PARTICIPANTS` を定義
-  - `.env.local` は Git にコミットしない
+- **環境変数**:
+  - `VITE_PARTICIPANTS`: カンマ区切りの参加者名
+    - 例: `VITE_PARTICIPANTS="Alice,Bob,Charlie,David"`
+    - Viteではクライアントに公開する環境変数に `VITE_` プレフィックスが必要
+  - ローカル開発時:
+    - `.env.local` に `VITE_PARTICIPANTS` を定義
+      - `.env.local` は Git にコミットしない
+  - 本番（Vercel）:
+    - Project Settings → Environment Variables で `VITE_PARTICIPANTS` を定義
 
-本番（Vercel）:
-- Project Settings → Environment Variables で `PARTICIPANTS` を定義
+### 2.3 開発フェーズ
 
-## 機能仕様
+BDDに基づいて以下の順番で実装する。
+設計（spec.md）→featureの記述→テストの実装→実装
 
-### 1. 参加者の読み込み
+#### フェーズ1: プロジェクトセットアップ
+- Vite + React + TypeScript プロジェクト作成
+- 依存関係のインストール
+- ディレクトリ構造の作成
+- 型定義の実装
 
-- 環境変数 `PARTICIPANTS` を読み込み、参加者名の配列として扱う。
+#### フェーズ2: データ層の実装
+- `parseParticipants.ts`: 環境変数のパース処理
+- `shuffle.ts`: Fisher-Yatesシャッフル実装
+- 単体テストの作成
+
+#### フェーズ3: 画面実装
+- `App.tsx`: メインコンポーネント実装
+- スタイリング（CSS）
+- コンポーネントテストの作成
+
+#### フェーズ4: テストとブラッシュアップ
+1. ユニットテスト
+2. 統合テスト
+3. E2Eテスト（主要フロー）
+
+## 3. 機能要件
+
+### 3.1 参加者の読み込み
+
+- 環境変数 `VITE_PARTICIPANTS` を読み込み、参加者名の配列として扱う。
+- アクセス方法: `import.meta.env.VITE_PARTICIPANTS`
 - 参加者名は以下の処理を行うこと:
   - 先頭と末尾の空白をトリムする
   - 空文字列は配列から除外する
@@ -44,12 +84,18 @@
 
 **エラー・フォールバック:**
 
-- `PARTICIPANTS` が未定義または空の場合:
+- `VITE_PARTICIPANTS` が未定義または空の場合:
   - ページ上部にエラー表示:  
-    - メッセージ例: `環境変数 PARTICIPANTS が設定されていません。`
+    - メッセージ例: `環境変数 VITE_PARTICIPANTS が設定されていません。`
   - シャッフルボタンは非活性または押しても何も起こらないようにする。
 
-### 2. ランダムシャッフル機能
+### 3.2 参加者パース処理
+
+- 環境変数 `VITE_PARTICIPANTS` をカンマで分割
+- 各要素の前後空白をトリム
+- 空文字列は除外
+
+### 3.3 ランダムシャッフル機能
 
 - 挙動:
   - ボタン「順番を決める」を押すたびに、現在の参加者リストをランダム順に並べ替える。
@@ -62,9 +108,9 @@
   - シードなどによる再現性は不要。
   - ページをリロードするたびに結果が変わってよい。
 
-### 3. UI 仕様
+### 3.4 UI 仕様
 
-#### 3.1 ページ構成
+#### ページ構成
 
 1ページのみ（ルート `/`）。
 
@@ -76,14 +122,14 @@
 
 2. 参加者一覧
    - 文言例: `参加者: Alice / Bob / Charlie / David`
-   - 参加者名は `PARTICIPANTS` を読み込んだ配列から生成
+   - 参加者名は `VITE_PARTICIPANTS` を読み込んだ配列から生成
    - 区切り文字は `/`（スペースを挟む）
 
 3. ボタン
    - 文言: `順番を決める`
    - 振る舞い:
      - クリック時に参加者配列をシャッフルし、その結果を状態として保持
-     - `PARTICIPANTS` が未設定、または参加者配列が空の場合は押せないようにする（`disabled`）
+     - `VITE_PARTICIPANTS` が未設定、または参加者配列が空の場合は押せないようにする（`disabled`）
 
 4. 結果表示
    - 初期状態:
@@ -104,7 +150,7 @@
      - 固定文言: `今日の発表順:`
      - その下に番号付きリスト（`<ol>` または `1. ...` のスタイル）で名前を表示
 
-#### 3.2 スタイル（ざっくり）
+#### スタイル（ざっくり）
 
 - レイアウト:
   - ページ中央寄せ（縦方向は任意、横方向は中央でも左寄せでもよい）
@@ -113,76 +159,33 @@
   - PCブラウザで問題なく表示できればよい
   - スマホ表示で極端に崩れなければ十分
 
-### 4. メタ情報
+### 3.5 メタ情報
 
-#### 4.1 ドキュメントタイトル
+#### ドキュメントタイトル
 
 - `<head>` の `<title>`:
   - 文言: `今日の順番`
 
-#### 4.2 アクセシビリティ（最低限）
+#### アクセシビリティ（最低限）
 
 - ボタンに `aria-label` を付与してもよいが、ボタンテキストが意味を持っているため必須ではない。
 - 結果リストは `ol` / `li` などの適切なリストタグで表示する。
 
-## 今後の拡張余地（任意）
+### 3.6 今後の拡張余地
+
+現時点では実装不要。MVPでは上記の仕様のみ実装する。
+
 - 「前回の結果」を1回分だけ表示する履歴機能
 - 「同じ人が連続で1番になりにくい」ような簡易バイアス調整
 - 発表順を固定して共有するためのURL生成（クエリパラメータなど）
-現時点では実装不要。MVPでは上記の仕様のみ実装する。
 
----
+## 4. BDDテスト仕様
 
-## BDDテスト仕様
+### 4.1 Gherkin Featureシナリオ
 
-### テストツール構成
+詳細は [features/todays-order.feature](../features/todays-order.feature) を参照。
 
-| 種別 | ツール | 用途 |
-|------|--------|------|
-| 受け入れ/E2E | Playwright + playwright-bdd | Gherkinシナリオの実行 |
-| 単体/コンポーネント | Vitest + React Testing Library | ロジック・UIコンポーネントのテスト |
-
-### Gherkin Featureシナリオ
-
-```gherkin
-Feature: 今日の順番アプリ
-
-  Scenario: 環境変数から参加者を正常に読み込む
-    Given 環境変数PARTICIPANTSに"Alice,Bob,Charlie,David"が設定されている
-    When ページを開く
-    Then 「参加者: Alice / Bob / Charlie / David」と表示される
-    And 「順番を決める」ボタンが活性化されている
-
-  Scenario: PARTICIPANTS未設定時にエラーメッセージを表示
-    Given 環境変数PARTICIPANTSが未設定である
-    When ページを開く
-    Then 「環境変数 PARTICIPANTS が設定されていません。」とエラー表示される
-    And 「順番を決める」ボタンが非活性である
-
-  Scenario: ボタンクリックで順番をシャッフルする
-    Given 参加者"Alice,Bob,Charlie,David"でページを開いている
-    And 「まだ順番が決まっていません。」と表示されている
-    When 「順番を決める」ボタンをクリックする
-    Then 「今日の発表順:」と表示される
-    And 4人の名前が番号付きリストで表示される
-
-  Scenario: 複数回シャッフルできる
-    Given シャッフル結果が表示されている状態
-    When 「順番を決める」ボタンを再度クリックする
-    Then 新しい順番で結果が更新される
-
-  Scenario: 空文字やスペースのみの参加者を除外する
-    Given 環境変数PARTICIPANTSに"Alice, ,Bob, Charlie ,,David"が設定されている
-    When ページを開く
-    Then 「参加者: Alice / Bob / Charlie / David」と表示される
-
-  Scenario: 参加者が空の場合ボタンが押せない
-    Given 環境変数PARTICIPANTSが空文字である
-    When ページを開く
-    Then 「順番を決める」ボタンがdisabled属性を持つ
-```
-
-### 単体テスト要件
+### 4.2 単体テスト要件
 
 #### Fisher-Yatesシャッフル（簡易検証）
 
@@ -196,21 +199,31 @@ Feature: 今日の順番アプリ
 - 各要素の前後空白がトリムされる
 - 空文字列が除外される
 
-### テストファイル構成
+### 4.3 ディレクトリ構成
 
 ```
 /
+├── src/
+│   ├── App.tsx                       # メインコンポーネント
+│   ├── main.tsx                      # エントリーポイント
+│   ├── index.css                     # スタイル
+│   ├── vite-env.d.ts                 # Vite型定義
+│   └── lib/
+│       ├── shuffle.ts                # Fisher-Yatesシャッフル
+│       ├── parseParticipants.ts      # 参加者パース
+│       └── __tests__/
+│           ├── shuffle.test.ts       # シャッフル単体テスト
+│           └── parseParticipants.test.ts  # パース単体テスト
 ├── features/
 │   ├── todays-order.feature          # Gherkinシナリオ
 │   └── step-definitions/
 │       └── todays-order.steps.ts     # ステップ定義
 ├── e2e/
 │   └── todays-order.spec.ts          # 追加E2Eテスト（任意）
-├── src/
-│   └── lib/
-│       └── __tests__/
-│           ├── shuffle.test.ts       # シャッフル単体テスト
-│           └── parseParticipants.test.ts  # パース単体テスト
+├── index.html                        # HTMLテンプレート
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
 ├── playwright.config.ts
 ├── vitest.config.ts
 └── .github/
@@ -218,7 +231,34 @@ Feature: 今日の順番アプリ
         └── test.yml                  # CI設定
 ```
 
-### CI設定（GitHub Actions）
+### 4.4 npm scripts
+
+```json
+{
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "test": "vitest run && playwright test"
+  }
+}
+```
+
+### 4.5 依存関係のインストール
+
+```bash
+# プロジェクト作成
+npm create vite@latest . -- --template react-ts
+
+# テスト関連
+npm install -D vitest @vitest/ui @testing-library/react @testing-library/jest-dom jsdom
+npm install -D playwright @playwright/test playwright-bdd
+npx playwright install
+```
+
+### 4.6 CI設定（GitHub Actions）
 
 - トリガー: `push` および `pull_request`（main/masterブランチ）
 - ジョブ:
@@ -227,23 +267,3 @@ Feature: 今日の順番アプリ
   3. 単体テスト実行 (`npm run test:unit`)
   4. Playwrightインストール (`npx playwright install --with-deps`)
   5. E2Eテスト実行 (`npm run test:e2e`)
-
-### 実行コマンド
-
-**インストール:**
-
-```bash
-npm install -D playwright @playwright/test playwright-bdd
-npm install -D vitest @vitest/ui @testing-library/react @testing-library/jest-dom jsdom
-npx playwright install
-```
-
-**npm scripts:**
-
-```json
-{
-  "test:unit": "vitest run",
-  "test:e2e": "playwright test",
-  "test": "vitest run && playwright test"
-}
-```

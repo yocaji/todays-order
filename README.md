@@ -2,18 +2,6 @@
 
 振り返り会の発表順をランダムに決めるシンプルな1ページWebアプリ。
 
-## 概要
-
-- 参加者名を環境変数から読み込み、ボタンクリックでランダムにシャッフル
-- Next.js (App Router) + TypeScript で実装
-- Vercel にデプロイ
-
-## 技術スタック
-
-- **フレームワーク**: Next.js (App Router) + TypeScript
-- **ホスティング**: Vercel
-- **テスト**: Playwright + playwright-bdd (E2E) / Vitest + React Testing Library (単体)
-
 ## セットアップ
 
 ### 1. 依存関係のインストール
@@ -102,7 +90,3 @@ npm run test
 ## 仕様
 
 詳細は [docs/spec.md](docs/spec.md) を参照。
-
-## ライセンス
-
-MIT
