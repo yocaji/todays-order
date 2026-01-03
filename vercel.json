@@ -1,14 +1,12 @@
 {
   "rewrites": [
     {
+      "source": "/",
+      "destination": "/404"
+    },
+    {
       "source": "/x7k9m2p4q8r1t5w3/:path*",
       "destination": "/x7k9m2p4q8r1t5w3/index.html"
-    }
-  ],
-  "routes": [
-    {
-      "src": "^/$",
-      "status": 404
     }
   ]
 }
